@@ -13,7 +13,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef GetStoreVersionAndUrl = Future<StoreVersionAndUrl?> Function(String packageName);
-typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck, Function()? closeDialogAction);
+typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck, Function()? closeDialogAction, String? title, Widget Function(BuildContext context, VersionCheck version)? dialogBody, String? updateText, String? closeText,);
 
 class StoreVersionAndUrl {
   final String storeVersion;
@@ -30,7 +30,11 @@ class VersionCheck {
   String? storeVersion;
   String? storeUrl;
   String? country;
+  String? title;
+  String? updateText;
+  String? closeText;
   Function()? closeDialogAction;
+  Widget Function(BuildContext, VersionCheck)? dialogBody;
 
   GetStoreVersionAndUrl? getStoreVersionAndUrl;
   ShowUpdateDialog? showUpdateDialog;
@@ -49,6 +53,10 @@ class VersionCheck {
     this.showUpdateDialog,
     this.country,
     this.closeDialogAction,
+    this.dialogBody,
+    this.title,
+    this.updateText,
+    this.closeText,
   });
 
   /// check version from iOS/Android/Mac store and
@@ -84,7 +92,7 @@ class VersionCheck {
       if (hasUpdate) {
         showUpdateDialog ??= _showUpdateDialog;
         // ignore: use_build_context_synchronously
-        showUpdateDialog!(context, this, closeDialogAction);
+        showUpdateDialog!(context, this, closeDialogAction, title, dialogBody, updateText, closeText);
       }
     }
   }
@@ -154,7 +162,7 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(String packageName) as
 
     /*
     /// This flow tricky, because cannot consistent for get latest version in play store.
-  
+
     // try {
     //   final elements = doc.getElementsByTagName('script');
 
@@ -266,13 +274,13 @@ bool _shouldUpdate(String? packageVersion, String? storeVersion) {
   return false;
 }
 
-void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function()? closeDialogAction) {
+void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function()? closeDialogAction, String? title, Widget Function(BuildContext context, VersionCheck version)? dialogBody, String? updateText, String? closeText, ) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
-      title: const Text('Update Available'),
-      content: SingleChildScrollView(
+      title: Text(title ?? 'Update Available'),
+      content: dialogBody != null ? dialogBody(context, versionCheck) : SingleChildScrollView(
         child: ListBody(
           children: [
             Text('Do you want to update to ${versionCheck.storeVersion}?'),
@@ -282,14 +290,14 @@ void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function
       ),
       actions: [
         TextButton(
-          child: const Text('Update'),
+          child: Text(updateText ?? 'Update'),
           onPressed: () async {
             Navigator.of(context).pop();
             await versionCheck.launchStore();
           },
         ),
         TextButton(
-          child: const Text('Close'),
+          child: Text(closeText ?? 'Close'),
           onPressed: () {
             Navigator.of(context).pop();
             closeDialogAction != null ? closeDialogAction() : null;

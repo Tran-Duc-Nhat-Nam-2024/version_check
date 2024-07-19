@@ -40,7 +40,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final versionCheck = VersionCheck(
     packageName: Platform.isIOS ? 'com.tachyonfactory.iconFinder' : 'com.tachyonfactory.icon_finder',
     packageVersion: '1.0.1',
-    showUpdateDialog: customShowUpdateDialog,
     country: 'kr',
   );
 
