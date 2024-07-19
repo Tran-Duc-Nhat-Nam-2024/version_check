@@ -13,7 +13,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef GetStoreVersionAndUrl = Future<StoreVersionAndUrl?> Function(String packageName);
-typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck);
+typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck, Function()? closeDialogAction);
 
 class StoreVersionAndUrl {
   final String storeVersion;
@@ -30,6 +30,7 @@ class VersionCheck {
   String? storeVersion;
   String? storeUrl;
   String? country;
+  Function()? closeDialogAction;
 
   GetStoreVersionAndUrl? getStoreVersionAndUrl;
   ShowUpdateDialog? showUpdateDialog;
@@ -47,6 +48,7 @@ class VersionCheck {
     this.getStoreVersionAndUrl,
     this.showUpdateDialog,
     this.country,
+    this.closeDialogAction,
   });
 
   /// check version from iOS/Android/Mac store and
@@ -82,7 +84,7 @@ class VersionCheck {
       if (hasUpdate) {
         showUpdateDialog ??= _showUpdateDialog;
         // ignore: use_build_context_synchronously
-        showUpdateDialog!(context, this);
+        showUpdateDialog!(context, this, closeDialogAction);
       }
     }
   }
@@ -264,7 +266,7 @@ bool _shouldUpdate(String? packageVersion, String? storeVersion) {
   return false;
 }
 
-void _showUpdateDialog(BuildContext context, VersionCheck versionCheck) {
+void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function()? closeDialogAction) {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -290,6 +292,7 @@ void _showUpdateDialog(BuildContext context, VersionCheck versionCheck) {
           child: const Text('Close'),
           onPressed: () {
             Navigator.of(context).pop();
+            closeDialogAction != null ? closeDialogAction() : null;
           },
         ),
       ],
