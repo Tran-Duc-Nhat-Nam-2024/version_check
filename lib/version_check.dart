@@ -13,7 +13,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef GetStoreVersionAndUrl = Future<StoreVersionAndUrl?> Function(String packageName);
-typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck, Function(VersionCheck versionCheck)? closeDialogAction, String? title, Widget Function(BuildContext context, VersionCheck version)? dialogBody, String? updateText, String? closeText, int forceUpdateDigit);
+typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck, Function(VersionCheck versionCheck)? closeDialogAction, String? title, Widget Function(BuildContext context, VersionCheck version)? dialogBody, String? updateText, String? closeText, String? quitText, int forceUpdateDigit);
 
 class StoreVersionAndUrl {
   final String storeVersion;
@@ -33,6 +33,7 @@ class VersionCheck {
   String? title;
   String? updateText;
   String? closeText;
+  String? quitText;
   int forceUpdateDigit;
   Function(VersionCheck versionCheck)? closeDialogAction;
   Widget Function(BuildContext, VersionCheck)? dialogBody;
@@ -58,6 +59,7 @@ class VersionCheck {
     this.title,
     this.updateText,
     this.closeText,
+    this.quitText,
     this.forceUpdateDigit = 0,
   });
 
@@ -94,7 +96,7 @@ class VersionCheck {
       if (hasUpdate) {
         showUpdateDialog ??= _showUpdateDialog;
         // ignore: use_build_context_synchronously
-        showUpdateDialog!(context, this, closeDialogAction, title, dialogBody, updateText, closeText, forceUpdateDigit);
+        showUpdateDialog!(context, this, closeDialogAction, title, dialogBody, updateText, closeText, quitText, forceUpdateDigit);
       }
     }
   }
@@ -276,7 +278,12 @@ bool _shouldUpdate(String? packageVersion, String? storeVersion) {
   return false;
 }
 
-void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function(VersionCheck versionCheck)? closeDialogAction, String? title, Widget Function(BuildContext context, VersionCheck version)? dialogBody, String? updateText, String? closeText, int numberForceDigit) {
+void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function(VersionCheck versionCheck)? closeDialogAction, String? title, Widget Function(BuildContext context, VersionCheck version)? dialogBody, String? updateText, String? closeText, String? quitText, int numberForceDigit) {
+  bool isForcedUpdate = numberForceDigit > 0
+      ? int.parse(versionCheck.storeVersion!.split('.')[numberForceDigit - 1]) >
+          int.parse(
+              versionCheck.packageVersion!.split('.')[numberForceDigit - 1])
+      : false;
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -299,10 +306,14 @@ void _showUpdateDialog(BuildContext context, VersionCheck versionCheck, Function
           },
         ),
         TextButton(
-          child: Text(closeText ?? 'Close'),
+          child: Text(isForcedUpdate ? quitText ?? 'Quit' : closeText ?? 'Close'),
           onPressed: () {
             Navigator.of(context).pop();
-            closeDialogAction != null ? closeDialogAction(versionCheck) : numberForceDigit > 0 ? int.parse(versionCheck.storeVersion!.split(".")[numberForceDigit - 1]) > int.parse(versionCheck.packageVersion!.split(".")[numberForceDigit - 1]) ? exit(0) : null : null;
+            closeDialogAction != null
+                ? closeDialogAction(versionCheck)
+                : isForcedUpdate
+                    ? exit(0)
+                    : null;
           },
         ),
       ],
