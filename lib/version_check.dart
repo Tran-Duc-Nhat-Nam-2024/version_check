@@ -149,9 +149,7 @@ class VersionCheck {
     final url = Uri.parse(storeUrl!);
     try {
       if (await canLaunchUrl(url)) {
-        await launchUrl(url).then((value) {
-          return true;
-        });
+        await launchUrl(url);
       } else {
       }
     } catch (e) {
