@@ -118,6 +118,52 @@ class VersionCheck {
     }
   }
 
+    Future<void> launchStoreForced(bool isForce) async {
+    if (getStoreVersionAndUrl == null) {
+      switch (Platform.operatingSystem) {
+        case 'android':
+          getStoreVersionAndUrl = _getAndroidStoreVersionAndUrl;
+          break;
+        case 'ios':
+          getStoreVersionAndUrl = _getIOSStoreVersionAndUrl;
+          break;
+        case 'macos':
+          getStoreVersionAndUrl = _getMacStoreVersionAndUrl;
+          break;
+        default:
+          throw 'Platform ${Platform.operatingSystem} not supported.';
+      }
+    }
+
+    final storeVersionAndUrl = await getStoreVersionAndUrl!(packageName!);
+    if (storeVersionAndUrl != null) {
+      storeVersion = storeVersionAndUrl.storeVersion;
+      storeUrl = storeVersionAndUrl.storeUrl;
+
+      if (hasUpdate) {
+        showUpdateDialog ??= _showUpdateDialog;
+        // ignore: use_build_context_synchronously
+        showUpdateDialog!(context, this, closeDialogAction, title, dialogBody, updateText, closeText, quitText, forceUpdateDigit);
+      }
+    }
+    final url = Uri.parse(storeUrl!);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        isForce ? exit(0) : throw 'Could not launch $url';
+      }
+    } catch (e) {
+      isForce ? exit(0) : throw 'Could not launch $url';
+    }
+  }
+
+  /// compare packageVersion and storeVersion and return true if update is needed.
+  static bool shouldUpdate(String? packageVersion, String? storeVersion) {
+    return _shouldUpdate(packageVersion, storeVersion);
+  }
+}
+
   /// compare packageVersion and storeVersion and return true if update is needed.
   static bool shouldUpdate(String? packageVersion, String? storeVersion) {
     return _shouldUpdate(packageVersion, storeVersion);
