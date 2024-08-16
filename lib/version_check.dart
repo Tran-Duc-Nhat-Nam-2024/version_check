@@ -119,6 +119,12 @@ class VersionCheck {
   }
 
   Future<void> launchStoreForced(bool isForce) async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    packageName ??= packageInfo.packageName;
+    packageVersion ??= packageInfo.version;
+    _country = country ?? 'us';
+
     if (getStoreVersionAndUrl == null) {
       switch (Platform.operatingSystem) {
         case 'android':
