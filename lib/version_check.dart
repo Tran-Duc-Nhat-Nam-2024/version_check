@@ -149,8 +149,12 @@ class VersionCheck {
     final url = Uri.parse(storeUrl!);
     try {
       if (await canLaunchUrl(url)) {
-        await launchUrl(url);
-        isForce ? exit(0) : null;
+        bool result = await launchUrl(url);
+        if (result) {
+          isForce ? exit(0) : null;
+        } else {
+          exit(0);
+        }
       } else {
         isForce ? exit(0) : throw 'Could not launch $url';
       }
