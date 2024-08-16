@@ -150,6 +150,7 @@ class VersionCheck {
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url);
+        isForce ? exit(0) : null;
       } else {
         isForce ? exit(0) : throw 'Could not launch $url';
       }
