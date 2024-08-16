@@ -150,7 +150,9 @@ class VersionCheck {
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url).then((value) {
-          isForce ? exit(0) : null;
+          Future.delayed(const Duration(seconds: 1), () {
+            isForce ? exit(0) : null;
+          });
           return true;
         });
       } else {
