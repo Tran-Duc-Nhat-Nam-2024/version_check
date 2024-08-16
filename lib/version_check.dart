@@ -153,10 +153,8 @@ class VersionCheck {
           return true;
         });
       } else {
-        isForce ? exit(0) : throw 'Could not launch $url';
       }
     } catch (e) {
-      isForce ? exit(0) : throw 'Could not launch $url';
     }
   }
 
