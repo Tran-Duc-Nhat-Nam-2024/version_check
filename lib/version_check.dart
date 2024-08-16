@@ -118,7 +118,7 @@ class VersionCheck {
     }
   }
 
-    Future<void> launchStoreForced(bool isForce) async {
+  Future<void> launchStoreForced(bool isForce) async {
     if (getStoreVersionAndUrl == null) {
       switch (Platform.operatingSystem) {
         case 'android':
@@ -151,12 +151,6 @@ class VersionCheck {
       isForce ? exit(0) : throw 'Could not launch $url';
     }
   }
-
-  /// compare packageVersion and storeVersion and return true if update is needed.
-  static bool shouldUpdate(String? packageVersion, String? storeVersion) {
-    return _shouldUpdate(packageVersion, storeVersion);
-  }
-}
 
   /// compare packageVersion and storeVersion and return true if update is needed.
   static bool shouldUpdate(String? packageVersion, String? storeVersion) {
