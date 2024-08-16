@@ -139,12 +139,6 @@ class VersionCheck {
     if (storeVersionAndUrl != null) {
       storeVersion = storeVersionAndUrl.storeVersion;
       storeUrl = storeVersionAndUrl.storeUrl;
-
-      if (hasUpdate) {
-        showUpdateDialog ??= _showUpdateDialog;
-        // ignore: use_build_context_synchronously
-        showUpdateDialog!(context, this, closeDialogAction, title, dialogBody, updateText, closeText, quitText, forceUpdateDigit);
-      }
     }
     final url = Uri.parse(storeUrl!);
     try {
